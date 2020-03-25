@@ -1,108 +1,73 @@
-##### JOE CODE HERE ####
-import math
+from tensorflow_core.python.keras.models import Model
+from tensorflow_core.python.keras.optimizers import Nadam
+from tensorflow_core.python.keras.layers import AveragePooling2D, BatchNormalization, Conv2D, Input, merge
+from tensorflow_core.python.keras.layers.core import Activation, Layer
+from tensorflow_core.python.keras.utils.visualize_util import plot
 
-import numpy as np
-from tensorflow_core.python.keras import regularizers
-from tensorflow_core.python.keras import layers
-from tensorflow_core.python.keras.models import Sequential
+'''
+Keras Customizable Residual Unit
+This is a simplified implementation of the basic (no bottlenecks) full pre-activation residual unit from He, K., Zhang, 
+X., Ren, S., Sun, J., "Identity Mappings in Deep Residual Networks" (http://arxiv.org/abs/1603.05027v2).
+'''
 
-def residual_block(y, nb_channels, _strides=(2, 2), _project_shortcut=False):
-    shortcut = y
 
-    # down-sampling is performed with a stride of 2
-    y = layers.Conv2D(nb_channels, kernel_size=(3, 3), strides=_strides, padding='same')(y)
-    y = layers.BatchNormalization()(y)
-    y = layers.LeakyReLU()(y)
+def conv_block(feat_maps_out, prev):
+    prev = BatchNormalization(axis=1, mode=2)(prev)  # Specifying the axis and mode allows for later merging
+    prev = Activation('relu')(prev)
+    prev = Conv2D(feat_maps_out, 3, 3, border_mode='same')(prev)
+    prev = BatchNormalization(axis=1, mode=2)(prev)  # Specifying the axis and mode allows for later merging
+    prev = Activation('relu')(prev)
+    prev = Conv2D(feat_maps_out, 3, 3, border_mode='same')(prev)
+    return prev
 
-    y = layers.Conv2D(nb_channels, kernel_size=(3, 3), strides=(1, 1), padding='same')(y)
-    y = layers.BatchNormalization()(y)
 
-    # identity shortcuts used directly when the input and output are of the same dimensions
-    if _project_shortcut or _strides != (1, 1):
-        # when the dimensions increase projection shortcut is used to match dimensions (done by 1×1 convolutions)
-        # when the shortcuts go across feature maps of two sizes, they are performed with a stride of 2
-        shortcut = layers.Conv2D(nb_channels, kernel_size=(1, 1), strides=_strides, padding='same')(shortcut)
-        shortcut = layers.BatchNormalization()(shortcut)
+def skip_block(feat_maps_in, feat_maps_out, prev):
+    if feat_maps_in != feat_maps_out:
+        # This adds in a 1x1 convolution on shortcuts that map between an uneven amount of channels
+        prev = Conv2D(feat_maps_out, 1, 1, border_mode='same')(prev)
+    return prev 
 
-    y = layers.add([shortcut, y])
-    y = layers.LeakyReLU()(y)
 
-    return y
+def Residual(feat_maps_in, feat_maps_out, prev_layer):
+    '''
+    A customizable residual unit with convolutional and shortcut blocks
+    Args:
+      feat_maps_in: number of channels/filters coming in, from input or previous layer
+      feat_maps_out: how many output channels/filters this block will produce
+      prev_layer: the previous layer
+    '''
 
-# 210 160 3
-# 42 32 3
-# input 96x96x128, 1 conv w stride 2, 128 output planes
-representation_network = Sequential([
-    Conv2D(3, (3, 3), strides=(2, 2), padding='same', input_shape=(96, 96, 3)),
-    residual_block(),
-    residual_block(),
-    Conv2D(),
-    residual_block(),
-    residual_block(),
-    residual_block(),
+    skip = skip_block(feat_maps_in, feat_maps_out, prev_layer)
+    conv = conv_block(feat_maps_out, prev_layer)
 
-])
+    print('Residual block mapping '+str(feat_maps_in)+' channels to '+str(feat_maps_out)+' channels built')
+    return merge([skip, conv], mode='sum')  # the residual connection
 
-class Residual_CNN(Gen_Model):
-    def __init__(self, reg_const, learning_rate, input_dim, output_dim, hidden_layers):
-        Gen_Model.__init__(self, reg_const, learning_rate, input_dim, output_dim)
-        self.hidden_layers = hidden_layers
-        self.num_layers = len(hidden_layers)
-        self.model = self._build_model()
 
-    def residual_layer(self, input_block, filters, kernel_size):
+if __name__ == "__main__":
+    img_rows = 42
+    img_cols = 32
 
-        x = self.conv_layer(input_block, filters, kernel_size)
+    inp = Input((3, img_rows, img_cols))
+    conv1 = Conv2D(filters=3, kernel_size=(3,3), strides=(2,2), padding='same',
+                         activation='relu', border_mode='same')(inp)
+    r1 = Residual(3, 3, conv1)
+    r2 = Residual(3, 3, r1)
+    conv2 = Conv2D(filters=6, kernel_size=(3, 3), strides=(2, 2), padding='same',
+                         activation='relu', border_mode='same')(r2)
 
-        x = Conv2D(
-            filters=filters
-            , kernel_size=kernel_size
-            , data_format="channels_first"
-            , padding='same'
-            , use_bias=False
-            , activation='linear'
-            , kernel_regularizer=regularizers.l2(self.reg_const)
-        )(x)
+    r3 = Residual(6, 6, conv2)
+    r4 = Residual(6, 6, r3)
 
-        x = BatchNormalization(axis=1)(x)
+    avg1 = AveragePooling2D(pool_size=(2,2))(r4)
 
-        x = add([input_block, x])
+    r5 = Residual(6, 6, avg1)
+    r6 = Residual(6, 6, r5)
+    r7 = Residual(6, 6, r6)
 
-        x = LeakyReLU()(x)
+    avg2 = AveragePooling2D(pool_size=(2, 2))(r7)
 
-        return (x)
+    model = Model(input=inp, output=avg2)
+    model.compile(optimizer=Nadam(lr=1e-5), loss='mean_squared_error')
 
-    def conv_layer(self, x, filters, kernel_size):
-
-        x = Conv2D(
-            filters=filters
-            , kernel_size=kernel_size
-            , data_format="channels_first"
-            , padding='same'
-            , use_bias=False
-            , activation='linear'
-            , kernel_regularizer=regularizers.l2(self.reg_const)
-        )(x)
-
-        x = BatchNormalization(axis=1)(x)
-        x = LeakyReLU()(x)
-
-        return (x)
-
-    def _build_model(self):
-
-        main_input = Input(shape=self.input_dim, name='main_input')
-
-        x = self.conv_layer(main_input, self.hidden_layers[0]['filters'], self.hidden_layers[0]['kernel_size'])
-
-        if len(self.hidden_layers) > 1:
-            for h in self.hidden_layers[1:]:
-                x = self.residual_layer(x, h['filters'], h['kernel_size'])
-
-        model = Model(inputs=[main_input], outputs=self.hidden_layers[-1])
-        model.compile(loss={'value_head': 'mean_squared_error', 'policy_head': softmax_cross_entropy_with_logits},
-                      optimizer=SGD(lr=self.learning_rate, momentum=config.MOMENTUM),
-                      loss_weights={'value_head': 0.5, 'policy_head': 0.5}
-                      )
-
-        return model
+    plot(model, to_file='./toy_model.png', show_shapes=True)
