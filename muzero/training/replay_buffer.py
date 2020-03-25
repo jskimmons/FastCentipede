@@ -43,7 +43,8 @@ class ReplayBuffer(object):
             last_mask = mask
             actions_time_batch[i] = [action.index for action in actions_batch if action]
 
-        batch = image_batch, targets_init_batch, targets_time_batch, actions_time_batch, mask_time_batch, dynamic_mask_time_batch
+        batch = image_batch, targets_init_batch, targets_time_batch, actions_time_batch, mask_time_batch, \
+                dynamic_mask_time_batch
         return batch
 
     def sample_games(self) -> List[AbstractGame]:

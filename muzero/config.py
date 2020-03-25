@@ -131,7 +131,7 @@ def make_centipede_config() -> MuZeroConfig:
         nb_training_loop=50,
         nb_episodes=20,
         nb_epochs=20,
-        network_args={'action_size': 2,
+        network_args={'action_size': 18,
                       'state_size': 4,
                       'representation_size': 4,
                       'max_value': 500},
