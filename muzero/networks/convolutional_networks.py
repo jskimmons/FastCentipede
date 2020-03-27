@@ -41,19 +41,34 @@ def residual(feat_maps_in, feat_maps_out, prev_layer):
     return merged
 
 
-def build_dynamic_network(shape, regularizer):
-    return None
+def build_dynamic_network(shape, filter_size1=14, filter_size2=6, conv_strides=1):
+    input = Input(shape)
+    c1 = Conv2D(filters=filter_size1, kernel_size=3, strides=conv_strides, padding='same', activation='relu',
+                input_shape=shape)(input)
+
+    r1 = residual(filter_size1, filter_size1, c1)
+    r2 = residual(filter_size1, filter_size1, r1)
+
+    c2 = Conv2D(filters=filter_size2, kernel_size=3, strides=conv_strides, padding='same', activation='relu',
+                input_shape=shape)(r2)
+
+    model = Model(inputs=input, outputs=c2)
+    return model
 
 
-def build_reward_network(shape, regularizer):
-    """
-    network = Sequential([
-        Dense(16, activation='relu', kernel_regularizer=regularizer),
-        Dense(1, kernel_regularizer=regularizer)
-    ])
-    return reward_network
-    """
-    return None
+def build_reward_network(shape, filter_size1=16, filter_size2=1, conv_strides=1):
+    input = Input(shape)
+    c1 = Conv2D(filters=filter_size1, kernel_size=3, strides=conv_strides, padding='same', activation='relu',
+                input_shape=shape)(input)
+
+    r1 = residual(filter_size1, filter_size1, c1)
+    r2 = residual(filter_size1, filter_size1, r1)
+
+    c2 = Conv2D(filters=filter_size2, kernel_size=3, strides=conv_strides, padding='same', activation='relu',
+                input_shape=shape)(r2)
+
+    model = Model(inputs=input, outputs=c2)
+    return model
 
 
 def build_policy_network(shape, regularizer, action_size):

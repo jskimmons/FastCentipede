@@ -47,8 +47,8 @@ class CentipedeNetwork(BaseNetwork):
 
             # Shape when actions are stacked on top of hidden rep
             stacked_hidden_rep_shape = (hidden_rep_shape[0], hidden_rep_shape[1], hidden_rep_shape[2] + 1)
-            dynamic_network = build_dynamic_network(stacked_hidden_rep_shape, regularizer=regularizer)
-            reward_network = build_reward_network(stacked_hidden_rep_shape, regularizer)
+            dynamic_network = build_dynamic_network(stacked_hidden_rep_shape)
+            reward_network = build_reward_network(stacked_hidden_rep_shape)
 
         super().__init__(representation_network, value_network, policy_network, dynamic_network, reward_network)
 

@@ -56,11 +56,13 @@ def update_weights(optimizer: tf.keras.optimizers, network: BaseNetwork, batch):
 
             # Creating conditioned_representation: concatenate representations with actions batch
             actions_batch = tf.one_hot(actions_batch, network.action_size)
+
+            # TODO: make this reshape dynamic
             actions_batch = tf.reshape(actions_batch, (actions_batch.shape[0], 6, 3, 1))
 
             paddings = tf.constant([[0, 0],
                                     [0, max(0, representation_batch.shape[1] - actions_batch.shape[1])],
-                                    [0, max(representation_batch.shape[2] - actions_batch.shape[2])],
+                                    [0, max(0, representation_batch.shape[2] - actions_batch.shape[2])],
                                     [0, 0]])
             actions_batch = tf.pad(actions_batch, paddings, "CONSTANT")
 
