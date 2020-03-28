@@ -41,19 +41,27 @@ def residual(feat_maps_in, feat_maps_out, prev_layer):
     return merged
 
 
-def build_dynamic_network(shape, regularizer):
-    return None
+def build_dynamic_network(shape, filter_size=6, conv_strides=1):
+    input = Input(shape)
+    c1 = Conv2D(filters=filter_size, kernel_size=(3, 3), strides=conv_strides, padding='same', activation='relu',
+                input_shape=shape)(input)
+    r1 = residual(filter_size, filter_size, c1)
+    model = Model(inputs=input, outputs=r1)
+    return model
 
 
-def build_reward_network(shape, regularizer):
-    """
-    network = Sequential([
-        Dense(16, activation='relu', kernel_regularizer=regularizer),
-        Dense(1, kernel_regularizer=regularizer)
-    ])
-    return reward_network
-    """
-    return None
+def build_reward_network(shape, filter_size1=3, filter_size2=1):
+    input = Input(shape)
+    c1 = Conv2D(filters=filter_size1, kernel_size=(3, 3), strides=2, padding='same', activation='relu',
+                input_shape=shape)(input)
+    a1 = AveragePooling2D(strides=2)(c1)
+    c2 = Conv2D(filters=filter_size2, kernel_size=(3, 3), strides=1, padding='same', activation='relu',
+                input_shape=shape)(a1)
+    a2 = AveragePooling2D(strides=2)(c2)
+    f1 = Flatten()(a2)
+
+    model = Model(inputs=input, outputs=f1)
+    return model
 
 
 def build_policy_network(shape, regularizer, action_size):
@@ -67,7 +75,7 @@ def build_policy_network(shape, regularizer, action_size):
     return policy_model
 
 
-def build_value_network(shape, regularizer):
+def build_value_network(shape, value_support_size):
     value_input = Input(shape)
     c1 = Conv2D(filters=1, kernel_size=1, padding='same', activation='linear')(value_input)
     b1 = BatchNormalization(axis=-1)(c1)
@@ -75,7 +83,7 @@ def build_value_network(shape, regularizer):
     f1 = Flatten()(l1)
     d2 = Dense(20, use_bias=False, activation='linear')(f1)
     l2 = LeakyReLU()(d2)
-    d2 = Dense(1, use_bias=False, activation='tanh')(l2)
+    d2 = Dense(value_support_size, use_bias=False, activation='tanh')(l2)
     value_model = Model(inputs=value_input, outputs=d2)
     return value_model
 

@@ -134,7 +134,7 @@ def make_centipede_config() -> MuZeroConfig:
         network_args={'action_size': 18,
                       'state_size': 4,
                       'representation_size': 4,
-                      'max_value': 500},
+                      'max_value': 1000},  # TODO: Figure out what these are exactly
         network=CentipedeNetwork,
         action_space_size=18,
         max_moves=1000,
