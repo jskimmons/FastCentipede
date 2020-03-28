@@ -75,7 +75,12 @@ class CentipedeNetwork(BaseNetwork):
         return np.asscalar(reward)
 
     def _conditioned_hidden_state(self, hidden_state: np.array, action: Action) -> np.array:
-        conditioned_hidden = np.concatenate((hidden_state, np.eye(self.action_size)[action.index]))
+        one_hot_action = np.eye(self.action_size)[action.index]
+        one_hot_action = np.reshape(one_hot_action, (6, 3, 1))
+        concat_action = np.zeros((hidden_state.shape[0], hidden_state.shape[1], 1))
+        concat_action[:one_hot_action.shape[0], :one_hot_action.shape[1]] = one_hot_action
+
+        conditioned_hidden = np.concatenate((hidden_state, concat_action), axis=2)
         return np.expand_dims(conditioned_hidden, axis=0)
 
     def _softmax(self, values):
