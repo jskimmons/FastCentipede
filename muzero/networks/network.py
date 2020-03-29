@@ -132,11 +132,11 @@ class BaseNetwork(AbstractNetwork):
         self.save_model(self.policy_network, directory + "/policy")
         self.save_model(self.dynamic_network, directory + "/dynamic")
         self.save_model(self.reward_network, directory + "/reward")
-        plot_model(self.representation_network, to_file='representation_net.png', show_shapes=True, show_layer_names=True, expand_nested=True)
-        plot_model(self.value_network, to_file='value_net.png', show_shapes=True, show_layer_names=True, expand_nested=True)
-        plot_model(self.policy_network, to_file='policy_net.png', show_shapes=True, show_layer_names=True, expand_nested=True)
-        plot_model(self.dynamic_network, to_file='dynamic_net.png', show_shapes=True, show_layer_names=True, expand_nested=True)
-        plot_model(self.reward_network, to_file='reward_net.png', show_shapes=True, show_layer_names=True, expand_nested=True)
+        # plot_model(self.representation_network, to_file='representation_net.png', show_shapes=True, show_layer_names=True, expand_nested=True)
+        # plot_model(self.value_network, to_file='value_net.png', show_shapes=True, show_layer_names=True, expand_nested=True)
+        # plot_model(self.policy_network, to_file='policy_net.png', show_shapes=True, show_layer_names=True, expand_nested=True)
+        # plot_model(self.dynamic_network, to_file='dynamic_net.png', show_shapes=True, show_layer_names=True, expand_nested=True)
+        # plot_model(self.reward_network, to_file='reward_net.png', show_shapes=True, show_layer_names=True, expand_nested=True)
 
     @staticmethod
     def save_model(model, name):
