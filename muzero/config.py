@@ -124,24 +124,29 @@ def make_cartpole_config() -> MuZeroConfig:
 
 def make_centipede_config() -> MuZeroConfig:
     def visit_softmax_temperature(num_moves, training_steps):
-        return 1.0
+        if training_steps < 500e3:
+            return 1.0
+        elif training_steps < 750e3:
+            return 0.5
+        else:
+            return 0.25
 
     return MuZeroConfig(
         game=Centipede,
         nb_training_loop=10,
-        nb_episodes=10,
+        nb_episodes=15,
         nb_epochs=10,
         network_args={'action_size': 18,
                       'state_size': 4,
                       'representation_size': 4,
-                      'max_value': 27000},  # TODO: Figure out what these are exactly
+                      'max_value': 500},  # TODO: Figure out what these are exactly
         network=CentipedeNetwork,
         action_space_size=18,
-        max_moves=5000,
-        discount=0.99,
+        max_moves=500,
+        discount=0.997,
         dirichlet_alpha=0.25,
         num_simulations=11,  # Odd number perform better in eval mode
-        batch_size=24,
+        batch_size=48,
         td_steps=10,
         visit_softmax_temperature_fn=visit_softmax_temperature,
         lr=0.05)
