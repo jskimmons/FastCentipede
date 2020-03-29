@@ -6,7 +6,7 @@ from training.training import train_network
 import argparse
 from signal import signal, SIGINT
 from sys import exit
-
+from time import time
 
 def muzero(config: MuZeroConfig, save_directory: str, load_directory: str, test: bool, visual: bool):
     """
@@ -35,6 +35,7 @@ def muzero(config: MuZeroConfig, save_directory: str, load_directory: str, test:
         return storage.latest_network()
 
     for loop in range(config.nb_training_loop):
+        start = time()
         print("Training loop", loop)
         score_train = run_selfplay(config, storage, replay_buffer, config.nb_episodes)
         train_network(config, storage, replay_buffer, config.nb_epochs)
@@ -43,6 +44,8 @@ def muzero(config: MuZeroConfig, save_directory: str, load_directory: str, test:
         print("Eval score:", run_eval(config, storage, 1, visual=visual))
         print(f"MuZero played {config.nb_episodes * (loop + 1)} "
               f"episodes and trained for {config.nb_epochs * (loop + 1)} epochs.\n")
+
+        print("loop time: {}".format(time() - start))
 
     return storage.latest_network()
 
