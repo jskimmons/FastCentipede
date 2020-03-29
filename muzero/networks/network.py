@@ -179,6 +179,6 @@ class BaseNetwork(AbstractNetwork):
                         self.dynamic_network, self.reward_network)
             return [variables
                     for variables_list in map(lambda n: n.weights, networks)
-                    for variables in variables_list]
+                    for variables in variables_list if variables.trainable]
 
         return get_variables
