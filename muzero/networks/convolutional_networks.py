@@ -64,13 +64,14 @@ def build_reward_network(shape, filter_size1=3, filter_size2=1):
     return model
 
 
-def build_policy_network(shape, regularizer, action_size):
+def build_policy_network(shape, action_size, regularizer):
     policy_input = Input(shape)
-    c1 = Conv2D(filters=1, kernel_size=1, padding='same', activation='linear')(policy_input)
+    c1 = Conv2D(filters=1, kernel_size=1, padding='same', activation='linear',
+                kernel_regularizer=regularizer)(policy_input)
     b1 = BatchNormalization(axis=-1)(c1)
     l1 = LeakyReLU()(b1)
     f1 = Flatten()(l1)
-    d1 = Dense(action_size, use_bias=False, activation='linear')(f1)
+    d1 = Dense(action_size, use_bias=False, activation='linear', kernel_regularizer=regularizer)(f1)
     policy_model = Model(inputs=policy_input, outputs=d1)
     return policy_model
 

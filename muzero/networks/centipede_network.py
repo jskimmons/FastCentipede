@@ -43,7 +43,7 @@ class CentipedeNetwork(BaseNetwork):
             # Ignore batch size when setting network inputs
             hidden_rep_shape = representation_network.output_shape[1:]
             value_network = build_value_network(hidden_rep_shape, self.value_support_size)
-            policy_network = build_policy_network(hidden_rep_shape, regularizer, self.action_size)
+            policy_network = build_policy_network(hidden_rep_shape, self.action_size, regularizer)
 
             # Shape when actions are stacked on top of hidden rep
             stacked_hidden_rep_shape = (hidden_rep_shape[0], hidden_rep_shape[1], hidden_rep_shape[2] + 1)

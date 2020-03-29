@@ -128,20 +128,20 @@ def make_centipede_config() -> MuZeroConfig:
 
     return MuZeroConfig(
         game=Centipede,
-        nb_training_loop=1,
-        nb_episodes=1,
-        nb_epochs=1,
+        nb_training_loop=3,
+        nb_episodes=3,
+        nb_epochs=3,
         network_args={'action_size': 18,
                       'state_size': 4,
                       'representation_size': 4,
-                      'max_value': 1000},  # TODO: Figure out what these are exactly
+                      'max_value': 27000},  # TODO: Figure out what these are exactly
         network=CentipedeNetwork,
         action_space_size=18,
         max_moves=1000,
         discount=0.99,
         dirichlet_alpha=0.25,
         num_simulations=11,  # Odd number perform better in eval mode
-        batch_size=24,
+        batch_size=512,
         td_steps=10,
         visit_softmax_temperature_fn=visit_softmax_temperature,
         lr=0.05)
