@@ -71,7 +71,7 @@ def build_policy_network(shape, action_size, regularizer):
     b1 = BatchNormalization(axis=-1)(c1)
     l1 = LeakyReLU()(b1)
     f1 = Flatten()(l1)
-    d1 = Dense(action_size, use_bias=False, activation='linear', kernel_regularizer=regularizer)(f1)
+    d1 = Dense(action_size, use_bias=False, activation='sigmoid', kernel_regularizer=regularizer)(f1)
     policy_model = Model(inputs=policy_input, outputs=d1)
     return policy_model
 
