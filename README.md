@@ -17,14 +17,14 @@ If you wish to train Muzero on other kinds of environments, this codebase can be
 - The code quality and documentation are quite lacking, and much of the code might still feel "in-progress".
 - The training and testing pipeline is not very advanced.
 
+### Running Centipede
+
+Enter the `muzero` directory and run `python muzero.py -h` for a list of arguments to use. Make sure to specify -c to
+run on Centipede
+
 ### Dependencies
 
-We run this code using:
-
-- Conda **4.7.12**
-- Python **3.7**
-- Tensorflow **2.0.0**
-- Numpy **1.17.3**
+We run this code using python3.7 and the libraries in `requirements.txt`:
 
 Do the following on a linux gcloud instance to install python 3.7
 

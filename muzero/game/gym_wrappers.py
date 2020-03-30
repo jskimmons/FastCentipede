@@ -34,7 +34,6 @@ class DownSampleVisualObservationWrapper(gym.ObservationWrapper):
         self.factor = factor
 
     def observation(self, observation):
-        # TODO: Implement down-sampling effectively
         # Default size is (250, 160, 3)
         if self.factor > 0:
             return cv2.resize(observation, dsize=(int(observation.shape[1]/self.factor),

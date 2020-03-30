@@ -66,7 +66,7 @@ class MuZeroConfig(object):
         # self.checkpoint_interval = int(1e3)
         self.window_size = int(1e6)
         self.batch_size = batch_size
-        self.num_unroll_steps = 0  # TODO what is this
+        self.num_unroll_steps = 0
         self.td_steps = td_steps
 
         self.weight_decay = 1e-4
@@ -139,7 +139,7 @@ def make_centipede_config() -> MuZeroConfig:
         network_args={'action_size': 18,
                       'state_size': 4,
                       'representation_size': 4,
-                      'max_value': 500},  # TODO: Figure out what these are exactly
+                      'max_value': 27000},
         network=CentipedeNetwork,
         action_space_size=18,
         max_moves=500,

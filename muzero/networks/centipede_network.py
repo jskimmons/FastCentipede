@@ -36,8 +36,6 @@ class CentipedeNetwork(BaseNetwork):
             print("Creating new network")
             regularizer = regularizers.l2(weight_decay)
 
-            # TODO: determine and set input sizes so model can be saved
-
             representation_network = build_representation_network(50, 32)
 
             # Ignore batch size when setting network inputs
