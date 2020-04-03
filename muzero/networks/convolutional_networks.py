@@ -57,8 +57,7 @@ def build_reward_network(shape, filter_size1=3, filter_size2=1):
     a1 = AveragePooling2D(strides=2)(c1)
     c2 = Conv2D(filters=filter_size2, kernel_size=(3, 3), strides=1, padding='same', activation='relu',
                 input_shape=shape)(a1)
-    a2 = AveragePooling2D(strides=2)(c2)
-    f1 = Flatten()(a2)
+    f1 = Flatten()(c2)
 
     model = Model(inputs=input, outputs=f1)
     return model
@@ -89,8 +88,8 @@ def build_value_network(shape, value_support_size):
     return value_model
 
 
-def build_representation_network(img_row, img_col, filter_size1=3, filter_size2=6, conv_strides=1, avg_pool_strides=2):
-    shape = (img_row, img_col, 3)
+def build_representation_network(input_shape, filter_size1=3, filter_size2=6, conv_strides=1, avg_pool_strides=2):
+    shape = (input_shape[0], input_shape[1], 3)
     input = Input(shape)
     c1 = Conv2D(filters=filter_size1, kernel_size=3, strides=conv_strides, padding='same', activation='relu',
                 input_shape=shape)(input)
@@ -99,7 +98,7 @@ def build_representation_network(img_row, img_col, filter_size1=3, filter_size2=
     r2 = residual(filter_size1, filter_size1, r1)
 
     c2 = Conv2D(filters=filter_size2, kernel_size=3, strides=conv_strides, padding='same', activation='relu',
-                input_shape=(img_row/conv_strides, img_col/conv_strides, 3))(r2)
+                input_shape=(shape[0]/conv_strides, shape[0]/conv_strides, 3))(r2)
 
     r3 = residual(filter_size2, filter_size2, c2)
     r4 = residual(filter_size2, filter_size2, r3)

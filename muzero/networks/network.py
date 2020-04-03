@@ -60,6 +60,10 @@ class InitialModel(Model):
 
     def call(self, image):
         image = tf.cast(image, tf.float32)
+        image = tf.squeeze(tf.image.rgb_to_grayscale(image))
+        # import matplotlib.pyplot as plt
+        # plt.imshow(image[1,:])
+        # plt.show()
         hidden_representation = self.representation_network(image)
         value = self.value_network(hidden_representation)
         policy_logits = self.policy_network(hidden_representation)
