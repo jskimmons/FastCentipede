@@ -4,7 +4,6 @@ from typing import Dict, List, Callable
 
 import numpy as np
 from tensorflow_core.python.keras.models import Model, model_from_json
-from tensorflow_core.python.keras.utils.vis_utils import plot_model
 import tensorflow_core as tf
 
 from game.game import Action
@@ -60,10 +59,7 @@ class InitialModel(Model):
 
     def call(self, image):
         image = tf.cast(image, tf.float32)
-        image = tf.squeeze(tf.image.rgb_to_grayscale(image))
-        # import matplotlib.pyplot as plt
-        # plt.imshow(image[1,:])
-        # plt.show()
+        image = tf.image.rgb_to_grayscale(image)
         hidden_representation = self.representation_network(image)
         value = self.value_network(hidden_representation)
         policy_logits = self.policy_network(hidden_representation)

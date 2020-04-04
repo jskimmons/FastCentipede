@@ -1,4 +1,4 @@
-from config import MuZeroConfig, make_cartpole_config, make_centipede_config
+from config import MuZeroConfig, make_centipede_config
 from networks.shared_storage import SharedStorage
 from self_play.self_play import run_selfplay, run_eval
 from training.replay_buffer import ReplayBuffer
@@ -71,15 +71,9 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--visual',
                         action='store_true',
                         help="display the network's evaluation for user")
-    parser.add_argument('-c', '--centipede',
-                        action='store_true',
-                        help="specify playing Centipede instead of CartPole")
+    # parser.add_argument('-c', '--centipede',
+    #                     action='store_true',
+    #                     help="specify playing Centipede instead of CartPole")
     args = parser.parse_args()
 
-    # Train the model with given config
-    if args.centipede:
-        config = make_centipede_config()
-    else:
-        config = make_cartpole_config()
-
-    muzero(config, args.save, args.load, args.test, args.visual)
+    muzero(make_centipede_config(), args.save, args.load, args.test, args.visual)
