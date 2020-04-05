@@ -1,3 +1,5 @@
+# from comet import comet
+
 from config import MuZeroConfig, make_centipede_config
 from networks.shared_storage import SharedStorage
 from self_play.self_play import run_selfplay, run_eval
@@ -7,6 +9,7 @@ import argparse
 from signal import signal, SIGINT
 from sys import exit
 from time import time
+
 
 def muzero(config: MuZeroConfig, save_directory: str, load_directory: str, test: bool, visual: bool):
     """
@@ -41,7 +44,7 @@ def muzero(config: MuZeroConfig, save_directory: str, load_directory: str, test:
         train_network(config, storage, replay_buffer, config.nb_epochs)
 
         print("Train score:", score_train)
-        print("Eval score:", run_eval(config, storage, 1, visual=visual))
+        print("Eval score:", run_eval(config, storage, 3, visual=visual))
         print(f"MuZero played {config.nb_episodes * (loop + 1)} "
               f"episodes and trained for {config.nb_epochs * (loop + 1)} epochs.\n")
 
