@@ -1,5 +1,4 @@
 """Training module: this is where MuZero neurons are trained."""
-
 import numpy as np
 import tensorflow_core as tf
 from tensorflow_core.python.keras.losses import MSE
@@ -101,7 +100,7 @@ def loss_value(target_value_batch, value_batch, value_support_size: int):
     targets = np.zeros((batch_size, value_support_size))
     sqrt_value = np.sqrt(target_value_batch)
     floor_value = np.floor(sqrt_value).astype(int)
-    floor_value = np.clip(floor_value, a_min=None, a_max=value_support_size-2)
+    floor_value = np.clip(floor_value, a_min=0, a_max=value_support_size-2)
     rest = sqrt_value - floor_value
     targets[range(batch_size), floor_value.astype(int)] = 1 - rest
     targets[range(batch_size), floor_value.astype(int) + 1] = rest

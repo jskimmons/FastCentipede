@@ -1,4 +1,4 @@
-from config import MuZeroConfig, make_cartpole_config, make_centipede_config
+from config import MuZeroConfig, make_centipede_config
 from networks.shared_storage import SharedStorage
 from self_play.self_play import run_selfplay, run_eval
 from training.replay_buffer import ReplayBuffer
@@ -7,6 +7,7 @@ import argparse
 from signal import signal, SIGINT
 from sys import exit
 from time import time
+
 
 def muzero(config: MuZeroConfig, save_directory: str, load_directory: str, test: bool, visual: bool):
     """
@@ -41,7 +42,7 @@ def muzero(config: MuZeroConfig, save_directory: str, load_directory: str, test:
         train_network(config, storage, replay_buffer, config.nb_epochs)
 
         print("Train score:", score_train)
-        print("Eval score:", run_eval(config, storage, 1, visual=visual))
+        print("Eval score:", run_eval(config, storage, 3, visual=visual))
         print(f"MuZero played {config.nb_episodes * (loop + 1)} "
               f"episodes and trained for {config.nb_epochs * (loop + 1)} epochs.\n")
 
@@ -71,15 +72,9 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--visual',
                         action='store_true',
                         help="display the network's evaluation for user")
-    parser.add_argument('-c', '--centipede',
-                        action='store_true',
-                        help="specify playing Centipede instead of CartPole")
+    # parser.add_argument('-c', '--centipede',
+    #                     action='store_true',
+    #                     help="specify playing Centipede instead of CartPole")
     args = parser.parse_args()
 
-    # Train the model with given config
-    if args.centipede:
-        config = make_centipede_config()
-    else:
-        config = make_cartpole_config()
-
-    muzero(config, args.save, args.load, args.test, args.visual)
+    muzero(make_centipede_config(), args.save, args.load, args.test, args.visual)

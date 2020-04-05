@@ -3,8 +3,6 @@ import math
 import numpy as np
 from .convolutional_networks import *
 from tensorflow_core.python.keras import regularizers
-from tensorflow_core.python.keras.layers.core import Dense
-from tensorflow_core.python.keras.models import Sequential, model_from_json
 
 from game.game import Action
 from networks.network import BaseNetwork
@@ -15,13 +13,14 @@ class CentipedeNetwork(BaseNetwork):
     def __init__(self,
                  state_size: int,
                  action_size: int,
-                 representation_size: int,
+                 representation_size: (int, int),
                  max_value: int,
                  hidden_neurons: int = 64,
                  weight_decay: float = 1e-4,
                  representation_activation: str = 'tanh',
                  directory: str = None):
         self.state_size = state_size
+        self.representation_size = representation_size
         self.action_size = action_size
         self.value_support_size = math.ceil(math.sqrt(max_value)) + 1
 
@@ -36,7 +35,7 @@ class CentipedeNetwork(BaseNetwork):
             print("Creating new network")
             regularizer = regularizers.l2(weight_decay)
 
-            representation_network = build_representation_network(50, 32)
+            representation_network = build_representation_network(representation_size)
 
             # Ignore batch size when setting network inputs
             hidden_rep_shape = representation_network.output_shape[1:]

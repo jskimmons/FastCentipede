@@ -89,17 +89,17 @@ def build_value_network(shape, value_support_size):
     return value_model
 
 
-def build_representation_network(img_row, img_col, filter_size1=3, filter_size2=6, conv_strides=1, avg_pool_strides=2):
-    shape = (img_row, img_col, 3)
-    input = Input(shape)
+def build_representation_network(input_shape, filter_size1=3, filter_size2=6, conv_strides=1, avg_pool_strides=2):
+
+    input = Input(input_shape)
     c1 = Conv2D(filters=filter_size1, kernel_size=3, strides=conv_strides, padding='same', activation='relu',
-                input_shape=shape)(input)
+                input_shape=input_shape)(input)
 
     r1 = residual(filter_size1, filter_size1, c1)
     r2 = residual(filter_size1, filter_size1, r1)
 
     c2 = Conv2D(filters=filter_size2, kernel_size=3, strides=conv_strides, padding='same', activation='relu',
-                input_shape=(img_row/conv_strides, img_col/conv_strides, 3))(r2)
+                input_shape=(input_shape[0]/conv_strides, input_shape[0]/conv_strides, 3))(r2)
 
     r3 = residual(filter_size2, filter_size2, c2)
     r4 = residual(filter_size2, filter_size2, r3)
