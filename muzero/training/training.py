@@ -1,5 +1,4 @@
 """Training module: this is where MuZero neurons are trained."""
-from comet import comet
 import numpy as np
 import tensorflow_core as tf
 from tensorflow_core.python.keras.losses import MSE
@@ -29,8 +28,6 @@ def update_weights(optimizer: tf.keras.optimizers, network: BaseNetwork, batch):
     def loss():
         loss = 0
         image_batch, targets_init_batch, targets_time_batch, actions_time_batch, mask_time_batch, dynamic_mask_time_batch = batch
-
-        # comet.get_experiment().log_image(image_batch[0])
 
         # Initial step, from the real observation: representation + prediction networks
         representation_batch, value_batch, policy_batch = network.initial_model(np.array(image_batch))
