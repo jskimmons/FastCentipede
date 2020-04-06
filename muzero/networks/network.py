@@ -4,7 +4,8 @@ from typing import Dict, List, Callable
 
 import numpy as np
 from tensorflow_core.python.keras.models import Model, model_from_json
-import tensorflow_core as tf
+from tensorflow_core import cast, float32
+from tensorflow_core.image import rgb_to_grayscale
 
 from game.game import Action
 
@@ -58,8 +59,8 @@ class InitialModel(Model):
         self.policy_network = policy_network
 
     def call(self, image):
-        image = tf.cast(image, tf.float32)
-        image = tf.image.rgb_to_grayscale(image)
+        image = cast(image, float32)
+        image = rgb_to_grayscale(image)
         hidden_representation = self.representation_network(image)
         value = self.value_network(hidden_representation)
         policy_logits = self.policy_network(hidden_representation)
@@ -104,7 +105,6 @@ class BaseNetwork(AbstractNetwork):
 
     def initial_inference(self, image: np.array) -> NetworkOutput:
         """representation + prediction function"""
-
         hidden_representation, value, policy_logits = self.initial_model.predict(np.expand_dims(image, 0))
         output = NetworkOutput(value=self._value_transform(value),
                                reward=0.,
@@ -132,11 +132,6 @@ class BaseNetwork(AbstractNetwork):
         self.save_model(self.policy_network, directory + "/policy")
         self.save_model(self.dynamic_network, directory + "/dynamic")
         self.save_model(self.reward_network, directory + "/reward")
-        # plot_model(self.representation_network, to_file='representation_net.png', show_shapes=True, show_layer_names=True, expand_nested=True)
-        # plot_model(self.value_network, to_file='value_net.png', show_shapes=True, show_layer_names=True, expand_nested=True)
-        # plot_model(self.policy_network, to_file='policy_net.png', show_shapes=True, show_layer_names=True, expand_nested=True)
-        # plot_model(self.dynamic_network, to_file='dynamic_net.png', show_shapes=True, show_layer_names=True, expand_nested=True)
-        # plot_model(self.reward_network, to_file='reward_net.png', show_shapes=True, show_layer_names=True, expand_nested=True)
 
     @staticmethod
     def save_model(model, name):
