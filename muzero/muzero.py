@@ -1,12 +1,15 @@
 from config import MuZeroConfig, make_centipede_config
 from networks.shared_storage import SharedStorage
-from self_play.self_play import run_selfplay, run_eval
+from self_play.self_play import run_selfplay, run_eval, multiprocess_play_game
 from training.replay_buffer import ReplayBuffer
 from training.training import train_network
 import argparse
 from signal import signal, SIGINT
 from sys import exit
 from time import time
+import tensorflow_core as tf
+# Disable WARNING logs to stdout
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 
 def muzero(config: MuZeroConfig, save_directory: str, load_directory: str, test: bool, visual: bool):
@@ -19,36 +22,47 @@ def muzero(config: MuZeroConfig, save_directory: str, load_directory: str, test:
     In contrast to the original MuZero algorithm this version doesn't works with
     multiple threads, therefore the training and self-play is done alternately.
     """
-
-    if load_directory is not None:
-        # User specified directory to load network from
-        network = config.old_network(load_directory)
-    else:
-        network = config.new_network()
-
-    storage = SharedStorage(network, config.uniform_network(), config.new_optimizer(), save_directory, load_directory != None)
+    config.load_directory = load_directory
+    config.save_directory = save_directory
     replay_buffer = ReplayBuffer(config)
 
     if test:
+        if load_directory is not None:
+            # User specified directory to load network from
+            network = config.old_network(load_directory)
+        else:
+            network = config.new_network()
+        storage = SharedStorage(network, config.uniform_network(), config.new_optimizer(), save_directory, config, load_directory != None)
+        # Single process for simple testing, can refactor later
         print("Eval score:", run_eval(config, storage, 5, visual=visual))
         print(f"MuZero played {5} "
               f"episodes.\n")
         return storage.latest_network()
 
     for loop in range(config.nb_training_loop):
+        initial = True if loop == 0 else False
         start = time()
+        o_start = time()
         print("Training loop", loop)
-        score_train = run_selfplay(config, storage, replay_buffer, config.nb_episodes)
-        train_network(config, storage, replay_buffer, config.nb_epochs)
+        episodes = config.nb_episodes
 
-        print("Train score:", score_train)
-        print("Eval score:", run_eval(config, storage, 3, visual=visual))
+        score_train = multiprocess_play_game(config, initial=initial, episodes=episodes, train=True, replay_buffer=replay_buffer)
+        print("Self play took " + str(time() - start) + " seconds")
+        print("Train score: " + str(score_train) + " after " + str(time() - start) + " seconds")
+
+        start = time()
+        print("Training network...")
+        train_network(config, replay_buffer, config.nb_epochs)
+        print("Network weights updated after " + str(time() - start) + " seconds")
+
+        start = time()
+        eval_eps = 5
+        print("Evaluating model...")
+        score_eval = multiprocess_play_game(config, initial=False, episodes=eval_eps, train=False, replay_buffer=replay_buffer)
+        print("Eval score: " + str(score_eval) + " after " + str(time() - start) + " seconds and " + str(eval_eps) + " episodes")
         print(f"MuZero played {config.nb_episodes * (loop + 1)} "
               f"episodes and trained for {config.nb_epochs * (loop + 1)} epochs.\n")
-
-        print("loop time: {}".format(time() - start))
-
-    return storage.latest_network()
+        print("Total loop time: " + str(time() - o_start) + " seconds")
 
 
 def handler(signal_received, frame):
@@ -72,9 +86,6 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--visual',
                         action='store_true',
                         help="display the network's evaluation for user")
-    # parser.add_argument('-c', '--centipede',
-    #                     action='store_true',
-    #                     help="specify playing Centipede instead of CartPole")
     args = parser.parse_args()
 
     muzero(make_centipede_config(), args.save, args.load, args.test, args.visual)

@@ -1,8 +1,8 @@
 import collections
 from typing import Optional, Dict
 
-import tensorflow_core as tf
 from game.centipede import Centipede
+import tensorflow_core as tf
 from game.game import AbstractGame
 from networks.centipede_network import CentipedeNetwork
 from networks.network import BaseNetwork, UniformNetwork
@@ -94,6 +94,7 @@ class MuZeroConfig(object):
     def new_optimizer(self) -> tf.keras.optimizers:
         return tf.keras.optimizers.SGD(learning_rate=self.lr, momentum=self.momentum)
 
+
 def make_centipede_config() -> MuZeroConfig:
     def visit_softmax_temperature(num_moves, training_steps):
         if training_steps < 500e3:
@@ -105,16 +106,16 @@ def make_centipede_config() -> MuZeroConfig:
 
     return MuZeroConfig(
         game=Centipede,
-        nb_training_loop=5,
+        nb_training_loop=3,
         nb_episodes=20,
-        nb_epochs=5,
+        nb_epochs=25,
         network_args={'action_size': 18,
                       'state_size': 4,
                       'representation_size': (50, 32, 1),
                       'max_value': 1000},
         network=CentipedeNetwork,
         action_space_size=18,
-        max_moves=500,
+        max_moves=1500,
         discount=0.2,
         dirichlet_alpha=0.25,
         num_simulations=11,  # Odd number perform better in eval mode

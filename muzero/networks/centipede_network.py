@@ -25,14 +25,12 @@ class CentipedeNetwork(BaseNetwork):
         self.value_support_size = math.ceil(math.sqrt(max_value)) + 1
 
         if directory is not None:
-            print("Loading network from " + directory)
             representation_network = self.load_model(directory + "/representation")
             value_network = self.load_model(directory + "/value")
             policy_network = self.load_model(directory + "/policy")
             dynamic_network = self.load_model(directory + "/dynamic")
             reward_network = self.load_model(directory + "/reward")
         else:
-            print("Creating new network")
             regularizer = regularizers.l2(weight_decay)
 
             representation_network = build_representation_network(representation_size)
@@ -46,14 +44,6 @@ class CentipedeNetwork(BaseNetwork):
             stacked_hidden_rep_shape = (hidden_rep_shape[0], hidden_rep_shape[1], hidden_rep_shape[2] + 1)
             dynamic_network = build_dynamic_network(stacked_hidden_rep_shape)
             reward_network = build_reward_network(stacked_hidden_rep_shape)
-
-            """
-            representation_network.summary()
-            value_network.summary()
-            policy_network.summary()
-            dynamic_network.summary()
-            reward_network.summary()
-            """
 
         super().__init__(representation_network, value_network, policy_network, dynamic_network, reward_network)
 
