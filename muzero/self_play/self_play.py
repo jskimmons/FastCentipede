@@ -12,6 +12,8 @@ from multiprocessing import Queue
 
 
 def multiprocess_play_game_helper(config: MuZeroConfig, initial: bool, train: bool, result_queue: Queue = None):
+    import os
+    os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
     pretrained = True
     if initial:
         if config.load_directory is not None:
