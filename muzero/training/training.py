@@ -13,7 +13,11 @@ from tensorflow_core.nn import softmax_cross_entropy_with_logits
 
 
 def train_network_helper(config: MuZeroConfig, replay_buffer: ReplayBuffer, epochs: int):
-    network = config.old_network('checkpoint')
+    try:
+        network = config.old_network('checkpoint')
+    except FileNotFoundError:
+        network = config.new_network()
+
     optimizer = config.new_optimizer()
 
     for _ in range(epochs):

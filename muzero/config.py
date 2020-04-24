@@ -6,6 +6,7 @@ import tensorflow_core as tf
 from game.game import AbstractGame
 from networks.centipede_network import CentipedeNetwork
 from networks.network import BaseNetwork, UniformNetwork
+from copy import copy
 
 KnownBounds = collections.namedtuple('KnownBounds', ['min', 'max'])
 
@@ -82,6 +83,11 @@ class MuZeroConfig(object):
         return self.game(self.discount)
 
     def new_network(self) -> BaseNetwork:
+        if self.network_args.get('directory', None) == 'checkpoint':
+            args = copy(self.network_args)
+            del args['directory']
+            return self.network(**args)
+
         return self.network(**self.network_args)
 
     def old_network(self, directory) -> BaseNetwork:
