@@ -38,7 +38,14 @@ def multiprocess_play_game(config: MuZeroConfig, initial: bool, episodes: int, t
     jobs = [multiprocessing.Process(target=multiprocess_play_game_helper, args=(config, initial, train, result_queue)) for _ in range(episodes)]
     for job in jobs: job.start()
     games = [result_queue.get() for _ in range(episodes)]
-    for job in jobs: job.join()
+
+    try:
+        for job in jobs: job.join()
+    except KeyboardInterrupt:
+        print('Parent process received CTRL-C')
+        for job in jobs:
+            job.terminate()
+            job.join()
 
     returns = []
     for game in games:
