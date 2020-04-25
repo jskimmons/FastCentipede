@@ -16,7 +16,8 @@ def train_network_helper(config: MuZeroConfig, replay_buffer: ReplayBuffer, epoc
     try:
         network = config.old_network('checkpoint')
     except FileNotFoundError:
-        network = config.new_network()
+        print('No checkpoint. Loading blank')
+        network = config.old_network('blank_network')
 
     optimizer = config.new_optimizer()
 

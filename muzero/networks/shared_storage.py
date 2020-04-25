@@ -31,7 +31,9 @@ class SharedStorage(object):
         self._networks[step] = network
 
     @staticmethod
-    def save_network_to_disk(network: BaseNetwork, config):
+    def save_network_to_disk(network: BaseNetwork, config, file=None):
+        if file:
+            network.save_network('blank_network')
         if config.save_directory:
             network.save_network(config.save_directory)
         network.save_network('checkpoint')

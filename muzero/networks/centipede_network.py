@@ -25,6 +25,7 @@ class CentipedeNetwork(BaseNetwork):
         self.value_support_size = math.ceil(math.sqrt(max_value)) + 1
 
         if directory is not None:
+            print('loading network from ' + directory)
             representation_network = self.load_model(directory + "/representation")
             value_network = self.load_model(directory + "/value")
             policy_network = self.load_model(directory + "/policy")

@@ -8,11 +8,13 @@ from self_play.utils import Node
 from training.replay_buffer import ReplayBuffer
 from time import time
 import multiprocessing
-from multiprocessing import Queue
+from multiprocessing import Queue, Pool, Semaphore, Process
+import os
 
 
-def multiprocess_play_game_helper(config: MuZeroConfig, initial: bool, train: bool, result_queue: Queue = None):
-    import os
+def multiprocess_play_game_helper(config: MuZeroConfig, initial: bool, train: bool, result_queue: Queue = None, sema=None):
+    sema.acquire()
+    # Prevent child processes from overallocating GPU
     os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
     pretrained = True
     if initial:
@@ -20,7 +22,7 @@ def multiprocess_play_game_helper(config: MuZeroConfig, initial: bool, train: bo
             # User specified directory to load network from
             network = config.old_network(config.load_directory)
         else:
-            network = config.new_network()
+            network = config.old_network('blank_network')
             pretrained = False
     else:
         network = config.old_network('checkpoint')
@@ -29,6 +31,7 @@ def multiprocess_play_game_helper(config: MuZeroConfig, initial: bool, train: bo
                             save_directory=config.save_directory, config=config, pretrained=pretrained)
 
     play_game(config=config, storage=storage, train=train, visual=False, queue=result_queue)
+    sema.release()
 
 
 def multiprocess_play_game(config: MuZeroConfig, initial: bool, episodes: int, train: bool, replay_buffer: ReplayBuffer):
@@ -37,17 +40,17 @@ def multiprocess_play_game(config: MuZeroConfig, initial: bool, episodes: int, t
     """
 
     result_queue = Queue()
-    jobs = [multiprocessing.Process(target=multiprocess_play_game_helper, args=(config, initial, train, result_queue)) for _ in range(episodes)]
-    for job in jobs: job.start()
-    games = [result_queue.get() for _ in range(episodes)]
 
-    try:
-        for job in jobs: job.join()
-    except KeyboardInterrupt:
-        print('Parent process received CTRL-C')
-        for job in jobs:
-            job.terminate()
-            job.join()
+    concurrency = multiprocessing.cpu_count()
+    total_task_num = episodes
+    sema = Semaphore(concurrency)
+    all_processes = []
+    for i in range(total_task_num):
+        p = Process(target=multiprocess_play_game_helper, args=(config, initial, train, result_queue, sema))
+        all_processes.append(p)
+        p.start()
+
+    games = [result_queue.get() for _ in range(episodes)]
 
     returns = []
     for game in games:
@@ -82,7 +85,11 @@ def play_game(config: MuZeroConfig, storage: SharedStorage, train: bool = True, 
     repeatedly executing a Monte Carlo Tree Search to generate moves until the end
     of the game is reached.
     """
-    network = storage.latest_network_for_process()
+    if queue:
+        network = storage.latest_network_for_process()
+    else:
+        network = storage.current_network
+
     start = time()
     game = config.new_game()
     mode_action_select = 'softmax' if train else 'max'
@@ -113,4 +120,5 @@ def play_game(config: MuZeroConfig, storage: SharedStorage, train: bool = True, 
     if queue:
         queue.put(game)
     print("Finished game episode after " + str(time() - start) + " seconds. Exceeded max moves? " + str(not game.terminal()))
+    print("Score: ", sum(game.rewards))
     return game

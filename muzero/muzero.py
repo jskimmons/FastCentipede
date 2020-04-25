@@ -7,12 +7,13 @@ import argparse
 from signal import signal, SIGINT
 from sys import exit
 from time import time
+import os
 import tensorflow_core as tf
 # Disable WARNING logs to stdout
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 
-def muzero(config: MuZeroConfig, save_directory: str, load_directory: str, test: bool, visual: bool):
+def muzero(config: MuZeroConfig, save_directory: str, load_directory: str, test: bool, visual: bool, new_config: bool):
     """
     MuZero training is split into two independent parts: Network training and
     self-play data generation.
@@ -25,6 +26,18 @@ def muzero(config: MuZeroConfig, save_directory: str, load_directory: str, test:
     config.load_directory = load_directory
     config.save_directory = save_directory
     replay_buffer = ReplayBuffer(config)
+    # Remove old checkpoint network
+    base_dir = os.path.dirname(os.path.realpath(__file__))
+    d = base_dir + '/checkpoint'
+    to_remove = [os.path.join(d, f) for f in os.listdir(d)]
+    for f in to_remove:
+        if f.split('/')[-1] != '.gitignore':
+            os.remove(f)
+
+    if new_config:
+        network = config.new_network()
+        SharedStorage.save_network_to_disk(network, config, 'blank_network')
+        exit(0)
 
     if test:
         if load_directory is not None:
@@ -86,6 +99,9 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--visual',
                         action='store_true',
                         help="display the network's evaluation for user")
+    parser.add_argument('-n', '--new_config',
+                        action='store_true',
+                        help="reload a new blank network if config has been changed")
     args = parser.parse_args()
 
-    muzero(make_centipede_config(), args.save, args.load, args.test, args.visual)
+    muzero(make_centipede_config(), args.save, args.load, args.test, args.visual, args.new_config)
