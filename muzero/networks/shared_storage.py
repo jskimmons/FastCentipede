@@ -36,21 +36,11 @@ class SharedStorage(object):
 
     @staticmethod
     def save_optimizer_to_disk(optimizer, dir):
-        """
-        f = h5py.File(dir+'/optimizer.h', mode='w')
-        symbolic_weights = getattr(optimizer, 'weights')
-        if symbolic_weights:
-            optimizer_weights_group = f.create_group('optimizer_weights')
-            weight_values = K.batch_get_value(symbolic_weights)
-        if optimizer:
-            save_optimizer_weights_to_hdf5_group(f, model.optimizer)
-        """
         if optimizer is None:
             return
-        symbolic_weights = getattr(optimizer, 'weights')
-        weight_values = K.batch_get_value(symbolic_weights)
         with open(dir + '/optimizer.pkl', 'wb') as f:
-            pickle.dump(weight_values, f)
+            pickle.dump(optimizer, f)
+        print('Saved optimizer to {}'.format(dir))
 
     @staticmethod
     def save_network_to_disk(network: BaseNetwork, config, optimizer, file=None):
