@@ -126,7 +126,7 @@ def update_weights(optimizer: optimizers, network: BaseNetwork, batch):
 def loss_value(target_value_batch, value_batch, value_support_size: int):
     batch_size = len(target_value_batch)
     targets = np.zeros((batch_size, value_support_size))
-    sqrt_value = np.sqrt(target_value_batch)
+    sqrt_value = np.sqrt(target_value_batch + abs(np.amin(target_value_batch)))
     floor_value = np.floor(sqrt_value).astype(int)
     floor_value = np.clip(floor_value, a_min=0, a_max=value_support_size-2)
     rest = sqrt_value - floor_value

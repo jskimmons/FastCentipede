@@ -60,6 +60,7 @@ class InitialModel(Model):
 
     def call(self, image):
         image = cast(image, float32)
+        image = rgb_to_grayscale(image)
         hidden_representation = self.representation_network(image)
         value = self.value_network(hidden_representation)
         policy_logits = self.policy_network(hidden_representation)
