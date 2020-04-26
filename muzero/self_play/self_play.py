@@ -54,7 +54,8 @@ def multiprocess_play_game(config: MuZeroConfig, initial: bool, episodes: int, t
 
     returns = []
     for game in games:
-        replay_buffer.save_game(game)
+        if train:
+            replay_buffer.save_game(game)
         returns.append(sum(game.rewards))
 
     return sum(returns) / episodes if episodes else 0

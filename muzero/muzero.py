@@ -36,7 +36,7 @@ def muzero(config: MuZeroConfig, save_directory: str, load_directory: str, test:
 
     if new_config:
         network = config.new_network()
-        SharedStorage.save_network_to_disk(network, config, 'blank_network')
+        SharedStorage.save_network_to_disk(network, config, None, 'blank_network')
         exit(0)
 
     if test:
@@ -67,6 +67,7 @@ def muzero(config: MuZeroConfig, save_directory: str, load_directory: str, test:
         print("Training network...")
         train_network(config, replay_buffer, config.nb_epochs)
         print("Network weights updated after " + str(time() - start) + " seconds")
+        """
 
         start = time()
         eval_eps = 5
@@ -76,6 +77,7 @@ def muzero(config: MuZeroConfig, save_directory: str, load_directory: str, test:
         print(f"MuZero played {config.nb_episodes * (loop + 1)} "
               f"episodes and trained for {config.nb_epochs * (loop + 1)} epochs.\n")
         print("Total loop time: " + str(time() - o_start) + " seconds")
+        """
 
 
 def handler(signal_received, frame):

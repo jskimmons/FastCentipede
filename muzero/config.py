@@ -3,10 +3,12 @@ from typing import Optional, Dict
 
 from game.centipede import Centipede
 import tensorflow_core as tf
+import tensorflow_core.keras.backend as K
 from game.game import AbstractGame
 from networks.centipede_network import CentipedeNetwork
 from networks.network import BaseNetwork, UniformNetwork
 from copy import copy
+import pickle
 
 KnownBounds = collections.namedtuple('KnownBounds', ['min', 'max'])
 
@@ -90,6 +92,11 @@ class MuZeroConfig(object):
 
         return self.network(**self.network_args)
 
+    def old_optimizer_weight_vals(self, directory):
+        with open(directory + '/optimizer.pkl', 'rb') as f:
+            weight_values = pickle.load(f)
+        return weight_values
+
     def old_network(self, directory) -> BaseNetwork:
         self.network_args['directory'] = directory
         return self.network(**self.network_args)
@@ -112,23 +119,23 @@ def make_centipede_config() -> MuZeroConfig:
 
     return MuZeroConfig(
         game=Centipede,
-        nb_training_loop=12,
-        nb_episodes=10,
+        nb_training_loop=30,
+        nb_episodes=20,
         nb_epochs=30,
         network_args={'action_size': 18,
                       'state_size': 4,
                       'representation_size': (50, 32, 3),
-                      'max_value': 1000},
+                      'max_value': 5000},
         network=CentipedeNetwork,
         action_space_size=18,
-        max_moves=2000,
-        discount=0.9,
+        max_moves=10000,
+        discount=0.997,
         dirichlet_alpha=0.25,
         num_simulations=11,  # Odd number perform better in eval mode
         batch_size=512,
         td_steps=10,
         visit_softmax_temperature_fn=visit_softmax_temperature,
-        lr=0.1)
+        lr=0.05)
 """
 Legacy configs from the DeepMind's pseudocode.
 def make_atari_config() -> MuZeroConfig:
