@@ -42,7 +42,7 @@ def muzero(config: MuZeroConfig, save_directory: str, load_directory: str, test:
         train_network(config, storage, replay_buffer, config.nb_epochs)
 
         print("Train score:", score_train)
-        print("Eval score:", run_eval(config, storage, 3, visual=visual))
+        print("Eval score:", run_eval(config, storage, 0, visual=visual))
         print(f"MuZero played {config.nb_episodes * (loop + 1)} "
               f"episodes and trained for {config.nb_epochs * (loop + 1)} epochs.\n")
 

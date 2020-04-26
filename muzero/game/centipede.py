@@ -16,6 +16,7 @@ class Centipede(AbstractGame):
         self.actions = list(map(lambda i: Action(i), range(self.env.action_space.n)))
         self.observations = [self.env.reset()]
         self.done = False
+        self.current_lives = 3
 
     @property
     def action_space_size(self) -> int:
@@ -25,9 +26,13 @@ class Centipede(AbstractGame):
     def step(self, action) -> int:
         """Execute one step of the game conditioned by the given action."""
 
-        observation, reward, done, _ = self.env.step(action.index)
+        observation, reward, done, info = self.env.step(action.index)
+        num_lives = info['ale.lives']
         self.observations += [observation]
         self.done = done
+        if num_lives < self.current_lives:
+            self.current_lives = num_lives
+            reward = -1000
         return reward
 
     def terminal(self) -> bool:

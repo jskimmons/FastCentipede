@@ -27,7 +27,7 @@ def run_eval(config: MuZeroConfig, storage: SharedStorage, eval_episodes: int, v
     for _ in range(eval_episodes):
         game = play_game(config, network, train=False, visual=visual)
         returns.append(sum(game.rewards))
-    return sum(returns) / eval_episodes if eval_episodes else 0
+    return (sum(returns)) / eval_episodes if eval_episodes else 0
 
 
 def play_game(config: MuZeroConfig, network: AbstractNetwork, train: bool = True, visual: bool = False) -> AbstractGame:
