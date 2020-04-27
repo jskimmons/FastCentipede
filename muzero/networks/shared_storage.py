@@ -53,8 +53,8 @@ class SharedStorage(object):
         network.save_network('checkpoint')
         SharedStorage.save_optimizer_to_disk(optimizer, 'checkpoint')
 
-    def latest_network_for_process(self) -> AbstractNetwork:
-        if self._networks:
+    def latest_network_for_process(self, initial=False) -> AbstractNetwork:
+        if self._networks and not initial:
             # Need to load network from disk independently for each individual process b/c tensorflow does not support
             # multiprocessing out of the box
             args = copy(self.config.network_args)

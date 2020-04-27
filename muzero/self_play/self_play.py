@@ -30,7 +30,7 @@ def multiprocess_play_game_helper(config: MuZeroConfig, initial: bool, train: bo
     storage = SharedStorage(network=network, uniform_network=config.uniform_network(), optimizer=config.new_optimizer(),
                             save_directory=config.save_directory, config=config, pretrained=pretrained)
 
-    play_game(config=config, storage=storage, train=train, visual=False, queue=result_queue)
+    play_game(config=config, storage=storage, train=train, visual=False, queue=result_queue, initial=initial)
     sema.release()
 
 
@@ -80,14 +80,14 @@ def run_eval(config: MuZeroConfig, storage: SharedStorage, eval_episodes: int, v
     return sum(returns) / eval_episodes if eval_episodes else 0
 
 
-def play_game(config: MuZeroConfig, storage: SharedStorage, train: bool = True, visual: bool = False, queue: Queue = None) -> AbstractGame:
+def play_game(config: MuZeroConfig, storage: SharedStorage, train: bool = True, visual: bool = False, queue: Queue = None, initial=False) -> AbstractGame:
     """
     Each game is produced by starting at the initial board position, then
     repeatedly executing a Monte Carlo Tree Search to generate moves until the end
     of the game is reached.
     """
     if queue:
-        network = storage.latest_network_for_process()
+        network = storage.latest_network_for_process(initial)
     else:
         network = storage.current_network
 
