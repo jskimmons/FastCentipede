@@ -60,6 +60,7 @@ class InitialModel(Model):
 
     def call(self, image):
         image = cast(image, float32)
+        image = rgb_to_grayscale(image)
         hidden_representation = self.representation_network(image)
         value = self.value_network(hidden_representation)
         policy_logits = self.policy_network(hidden_representation)
@@ -104,7 +105,7 @@ class BaseNetwork(AbstractNetwork):
 
     def initial_inference(self, image: np.array) -> NetworkOutput:
         """representation + prediction function"""
-        hidden_representation, value, policy_logits = self.initial_model.predict(np.expand_dims(image, 0))
+        hidden_representation, value, policy_logits = self.initial_model.predict(np.expand_dims(image, 0), use_multiprocessing=False)
         output = NetworkOutput(value=self._value_transform(value),
                                reward=0.,
                                policy_logits=NetworkOutput.build_policy_logits(policy_logits),
@@ -115,7 +116,7 @@ class BaseNetwork(AbstractNetwork):
         """dynamics + prediction function"""
 
         conditioned_hidden = self._conditioned_hidden_state(hidden_state, action)
-        hidden_representation, reward, value, policy_logits = self.recurrent_model.predict(conditioned_hidden)
+        hidden_representation, reward, value, policy_logits = self.recurrent_model.predict(conditioned_hidden, use_multiprocessing=False)
         output = NetworkOutput(value=self._value_transform(value),
                                reward=self._reward_transform(reward),
                                policy_logits=NetworkOutput.build_policy_logits(policy_logits),
