@@ -9,6 +9,7 @@ from sys import exit
 from time import time
 import os
 import tensorflow_core as tf
+from distutils.dir_util import copy_tree
 # Disable WARNING logs to stdout
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
@@ -28,11 +29,16 @@ def muzero(config: MuZeroConfig, save_directory: str, load_directory: str, test:
     replay_buffer = ReplayBuffer(config)
     # Remove old checkpoint network
     base_dir = os.path.dirname(os.path.realpath(__file__))
+
     d = base_dir + '/checkpoint'
     to_remove = [os.path.join(d, f) for f in os.listdir(d)]
     for f in to_remove:
         if f.split('/')[-1] != '.gitignore':
             os.remove(f)
+
+    if load_directory:
+        # Copy load directory to checkpoint directory
+        copy_tree(src=load_directory, dst=d)
 
     if new_config:
         network = config.new_network()
