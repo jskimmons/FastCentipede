@@ -7,6 +7,7 @@ from networks.shared_storage import SharedStorage
 from self_play.mcts import run_mcts, select_action, expand_node, add_exploration_noise
 from self_play.utils import Node
 from training.replay_buffer import ReplayBuffer
+from display import progress_bar
 
 
 def run_selfplay(config: MuZeroConfig, storage: SharedStorage, replay_buffer: ReplayBuffer, train_episodes: int):
@@ -14,9 +15,13 @@ def run_selfplay(config: MuZeroConfig, storage: SharedStorage, replay_buffer: Re
     network = storage.latest_network()
     returns = []
     for _ in range(train_episodes):
+        progress_bar(_, train_episodes, name='Selfplay')
         game = play_game(config, network)
         replay_buffer.save_game(game)
         returns.append(sum(game.rewards))
+    if train_episodes:
+        progress_bar(train_episodes, train_episodes, name='Selfplay')
+        print('{}'.format(' '*60), end='\r')
     return sum(returns) / train_episodes
 
 
@@ -25,8 +30,12 @@ def run_eval(config: MuZeroConfig, storage: SharedStorage, eval_episodes: int, v
     network = storage.latest_network()
     returns = []
     for _ in range(eval_episodes):
+        progress_bar(_, eval_episodes, name='Eval')
         game = play_game(config, network, train=False, visual=visual)
         returns.append(sum(game.rewards))
+    if eval_episodes:
+        progress_bar(eval_episodes, eval_episodes, name='Eval')
+        print('{}'.format(' '*60), end='\r')
     return (sum(returns)) / eval_episodes if eval_episodes else 0
 
 

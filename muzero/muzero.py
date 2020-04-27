@@ -7,6 +7,9 @@ import argparse
 from signal import signal, SIGINT
 from sys import exit
 from time import time
+# Disable WARNING logs to stdout
+import tensorflow_core as tf
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 
 def muzero(config: MuZeroConfig, save_directory: str, load_directory: str, test: bool, visual: bool):
@@ -30,23 +33,35 @@ def muzero(config: MuZeroConfig, save_directory: str, load_directory: str, test:
     replay_buffer = ReplayBuffer(config)
 
     if test:
-        print("Eval score:", run_eval(config, storage, 5, visual=visual))
-        print(f"MuZero played {5} "
+        test_eps = 0
+        print("Eval score:", run_eval(config, storage, test_eps, visual=visual))
+        print(f"MuZero played {test_eps} "
               f"episodes.\n")
         return storage.latest_network()
 
+    test_eps = 0
     for loop in range(config.nb_training_loop):
         start = time()
         print("Training loop", loop)
+
         score_train = run_selfplay(config, storage, replay_buffer, config.nb_episodes)
+        print("\tTrain score: " + str(score_train), '({} games)'.format(config.nb_episodes))
+        self_play_time = time()
+
         train_network(config, storage, replay_buffer, config.nb_epochs)
+        train_time = time()
 
-        print("Train score:", score_train)
-        print("Eval score:", run_eval(config, storage, 0, visual=visual))
-        print(f"MuZero played {config.nb_episodes * (loop + 1)} "
-              f"episodes and trained for {config.nb_epochs * (loop + 1)} epochs.\n")
+        print("\tEval score:", run_eval(config, storage, test_eps, visual=visual), '({} games)'.format(test_eps))
+        eval_time = time()
 
-        print("loop time: {}".format(time() - start))
+        print(f"\tMuZero played {config.nb_episodes * (loop + 1)} "
+              f"episodes and trained for {config.nb_epochs * (loop + 1)} epochs.")
+
+        print("\tTime: {} total; {} selfplay; {} training; {} eval;".format(
+            round(time() - start, 2),
+            round(self_play_time - start, 2),
+            round(train_time - self_play_time, 2),
+            round(eval_time - train_time, 2)))
 
     return storage.latest_network()
 

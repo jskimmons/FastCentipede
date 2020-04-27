@@ -1,5 +1,6 @@
 """Training module: this is where MuZero neurons are trained."""
 import numpy as np
+from display import progress_bar
 import tensorflow_core as tf
 from tensorflow_core.python.keras.losses import MSE
 
@@ -14,9 +15,13 @@ def train_network(config: MuZeroConfig, storage: SharedStorage, replay_buffer: R
     optimizer = storage.optimizer
 
     for _ in range(epochs):
+        progress_bar(_, epochs, name='Training')
         batch = replay_buffer.sample_batch(config.num_unroll_steps, config.td_steps)
         update_weights(optimizer, network, batch)
         storage.save_network(network.training_steps, network)
+    if epochs:
+        progress_bar(epochs, epochs, name='Training')
+        print('{}'.format(' '*60), end='\r')
     storage.save_network_to_disk(network)
 
 
