@@ -22,7 +22,7 @@ def run_selfplay(config: MuZeroConfig, storage: SharedStorage, replay_buffer: Re
     if train_episodes:
         progress_bar(train_episodes, train_episodes, name='Selfplay')
         print('{}'.format(' '*60), end='\r')
-    return sum(returns) / train_episodes
+    return sum(returns) / train_episodes, returns
 
 
 def run_eval(config: MuZeroConfig, storage: SharedStorage, eval_episodes: int, visual: bool = False):

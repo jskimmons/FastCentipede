@@ -64,7 +64,7 @@ class MuZeroConfig(object):
         # self.checkpoint_interval = int(1e3)
         self.window_size = int(1e6)
         self.batch_size = batch_size
-        self.num_unroll_steps = 0
+        self.num_unroll_steps = 4
         self.td_steps = td_steps
 
         self.weight_decay = 1e-4
@@ -92,7 +92,9 @@ class MuZeroConfig(object):
         return UniformNetwork(self.action_space_size)
 
     def new_optimizer(self) -> tf.keras.optimizers:
-        return tf.keras.optimizers.SGD(learning_rate=self.lr, momentum=self.momentum)
+        # return tf.keras.optimizers.SGD(learning_rate=self.lr, momentum=self.momentum)
+        return tf.keras.optimizers.Adam(learning_rate=self.lr)
+
 
 def make_centipede_config() -> MuZeroConfig:
     def visit_softmax_temperature(num_moves, training_steps):
@@ -105,23 +107,23 @@ def make_centipede_config() -> MuZeroConfig:
 
     return MuZeroConfig(
         game=Centipede,
-        nb_training_loop=3,
-        nb_episodes=5,
-        nb_epochs=10,
-        network_args={'action_size': 18,
+        nb_training_loop=30,
+        nb_episodes=3,
+        nb_epochs=15,
+        network_args={'action_size': 9,
                       'state_size': 4,
                       'representation_size': (50, 32, 1),
                       'max_value': 5000},
         network=CentipedeNetwork,
         action_space_size=18,
-        max_moves=20000,
-        discount=0.3,
+        max_moves=11200,
+        discount=0.8,
         dirichlet_alpha=0.25,
         num_simulations=11,  # Odd number perform better in eval mode
         batch_size=512,
-        td_steps=10,
+        td_steps=15,
         visit_softmax_temperature_fn=visit_softmax_temperature,
-        lr=0.05)
+        lr=0.01)
 """
 Legacy configs from the DeepMind's pseudocode.
 def make_atari_config() -> MuZeroConfig:

@@ -3,6 +3,7 @@ import numpy as np
 from display import progress_bar
 import tensorflow_core as tf
 from tensorflow_core.python.keras.losses import MSE
+from copy import copy
 
 from config import MuZeroConfig
 from networks.network import BaseNetwork
@@ -45,9 +46,10 @@ def update_weights(optimizer: tf.keras.optimizers, network: BaseNetwork, batch):
 
         # Compute the loss of the first pass
         loss += tf.math.reduce_mean(loss_value(target_value_batch, value_batch, network.value_support_size))
+        losses = [copy(loss)]
         loss += tf.math.reduce_mean(
             tf.nn.softmax_cross_entropy_with_logits(logits=policy_batch, labels=target_policy_batch))
-
+        losses.append(loss)
         # Recurrent steps, from action and previous hidden state.
         for actions_batch, targets_batch, mask, dynamic_mask in zip(actions_time_batch, targets_time_batch,
                                                                     mask_time_batch, dynamic_mask_time_batch):
@@ -62,7 +64,7 @@ def update_weights(optimizer: tf.keras.optimizers, network: BaseNetwork, batch):
             actions_batch = tf.one_hot(actions_batch, network.action_size)
 
             # TODO: make this reshape dynamic
-            actions_batch = tf.reshape(actions_batch, (actions_batch.shape[0], 6, 3, 1))
+            actions_batch = tf.reshape(actions_batch, (actions_batch.shape[0], 3, 3, 1))
 
             paddings = tf.constant([[0, 0],
                                     [0, max(0, representation_batch.shape[1] - actions_batch.shape[1])],
@@ -89,11 +91,24 @@ def update_weights(optimizer: tf.keras.optimizers, network: BaseNetwork, batch):
 
             # Scale the gradient of the loss by the average number of actions unrolled
             gradient_scale = 1. / len(actions_time_batch)
-            loss += scale_gradient(l, gradient_scale)
+            #print('contribution', scale_gradient(l, gradient_scale))
+            #print(l)
+
+            grad = scale_gradient(l, gradient_scale)
+            loss += grad
+            losses.append(grad)
 
             # Half the gradient of the representation
             representation_batch = scale_gradient(representation_batch, 0.5)
 
+        # Cap by threshold to prevent exploding gradient (https://arxiv.org/pdf/1211.5063.pdf)
+        threshold = 9.9999999e25
+        loss = loss * (threshold/max(loss, threshold))
+        print('\t loss: {}'.format(loss), end='\r')
+
+        if tf.math.is_nan(loss):
+            print("WARNING: VANISHED GRADIENT")
+            print(losses)
         return loss
 
     optimizer.minimize(loss=loss, var_list=network.cb_get_variables())
@@ -103,11 +118,21 @@ def update_weights(optimizer: tf.keras.optimizers, network: BaseNetwork, batch):
 def loss_value(target_value_batch, value_batch, value_support_size: int):
     batch_size = len(target_value_batch)
     targets = np.zeros((batch_size, value_support_size))
-    sqrt_value = np.sqrt(target_value_batch + abs(np.amin(target_value_batch)))
+    sqrt_value = np.sqrt(target_value_batch) # + abs(np.amin(target_value_batch)))
+    # qrt of negative = floor of nan = big negative
     floor_value = np.floor(sqrt_value).astype(int)
+    #print(floor_value)
+
+    #import pdb
+    #pdb.set_trace()
     floor_value = np.clip(floor_value, a_min=0, a_max=value_support_size-2)
     rest = sqrt_value - floor_value
     targets[range(batch_size), floor_value.astype(int)] = 1 - rest
     targets[range(batch_size), floor_value.astype(int) + 1] = rest
 
-    return tf.nn.softmax_cross_entropy_with_logits(logits=value_batch, labels=targets)
+    val = tf.nn.softmax_cross_entropy_with_logits(logits=value_batch, labels=targets)
+    #tf.math.reduce_mean(loss)
+    if tf.math.is_nan(tf.math.reduce_mean(val)):
+        import pdb
+        pdb.set_trace()
+    return val

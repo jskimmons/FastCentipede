@@ -61,7 +61,8 @@ class InitialModel(Model):
         image = tf.cast(image, tf.float32)
         image = tf.image.rgb_to_grayscale(image)
         hidden_representation = self.representation_network(image)
-        value = self.value_network(hidden_representation)
+        # https://stackoverflow.com/questions/33712178/tensorflow-nan-bug/33713196#33713196
+        value = self.value_network(hidden_representation) + 1e-10
         policy_logits = self.policy_network(hidden_representation)
         return hidden_representation, value, policy_logits
 
@@ -79,7 +80,8 @@ class RecurrentModel(Model):
     def call(self, conditioned_hidden):
         hidden_representation = self.dynamic_network(conditioned_hidden)
         reward = self.reward_network(conditioned_hidden)
-        value = self.value_network(hidden_representation)
+        # https://stackoverflow.com/questions/33712178/tensorflow-nan-bug/33713196#33713196
+        value = self.value_network(hidden_representation) + 1e-10
         policy_logits = self.policy_network(hidden_representation)
         return hidden_representation, reward, value, policy_logits
 
@@ -126,7 +128,7 @@ class BaseNetwork(AbstractNetwork):
     def save_network(self, directory):
         if directory is None:
             return
-        print("Saving current network to " + directory)
+        print("\tSaving current network to " + directory)
         self.save_model(self.representation_network, directory + "/representation")
         self.save_model(self.value_network, directory + "/value")
         self.save_model(self.policy_network, directory + "/policy")
