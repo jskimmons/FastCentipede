@@ -11,15 +11,11 @@ from networks.network import BaseNetwork
 class CentipedeNetwork(BaseNetwork):
 
     def __init__(self,
-                 state_size: int,
                  action_size: int,
                  representation_size: (int, int),
                  max_value: int,
-                 hidden_neurons: int = 64,
                  weight_decay: float = 1e-4,
-                 representation_activation: str = 'tanh',
                  directory: str = None):
-        self.state_size = state_size
         self.representation_size = representation_size
         self.action_size = action_size
         self.value_support_size = math.ceil(math.sqrt(max_value)) + 1
