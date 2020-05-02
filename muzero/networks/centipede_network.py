@@ -69,7 +69,7 @@ class CentipedeNetwork(BaseNetwork):
 
     def _conditioned_hidden_state(self, hidden_state: np.array, action: Action) -> np.array:
         one_hot_action = np.eye(self.action_size)[action.index]
-        one_hot_action = np.reshape(one_hot_action, (3, 3, 1))
+        one_hot_action = np.reshape(one_hot_action, (2, 2, 1))
         concat_action = np.zeros((hidden_state.shape[0], hidden_state.shape[1], 1))
         concat_action[:one_hot_action.shape[0], :one_hot_action.shape[1]] = one_hot_action
 

@@ -10,13 +10,12 @@ class Centipede(AbstractGame):
 
     def __init__(self, discount: float):
         super().__init__(discount)
-        self.env = gym.make('Centipede-v0')
-        self.env = LimitToShootActions(self.env)
+        self.env = gym.make('Breakout-v0')
+        #self.env = LimitToShootActions(self.env)
         self.env = DownSampleVisualObservationWrapper(self.env, factor=5)
-        self.actions = list(map(lambda i: Action(i), list(range(9))))
+        self.actions = list(map(lambda i: Action(i), list(range(self.env.action_space.n))))
         self.observations = [self.env.reset()]
         self.done = False
-        self.curr_lives = 3
 
     @property
     def action_space_size(self) -> int:
@@ -33,8 +32,6 @@ class Centipede(AbstractGame):
 
     def terminal(self) -> bool:
         """Is the game is finished?"""
-        if self.curr_lives < 3:
-            return True
         return self.done
 
     def legal_actions(self) -> List[Action]:

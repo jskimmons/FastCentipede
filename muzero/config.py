@@ -109,12 +109,12 @@ def make_centipede_config() -> MuZeroConfig:
         game=Centipede,
         nb_training_loop=5,
         nb_episodes=5,
-        nb_epochs=5,
-        network_args={'action_size': 9,
-                      'representation_size': (50, 32, 1),
+        nb_epochs=20,
+        network_args={'action_size': 4,
+                      'representation_size': (42, 32, 1),
                       'max_value': 5000},
         network=CentipedeNetwork,
-        action_space_size=18,
+        action_space_size=4,
         max_moves=200,
         discount=0.8,
         dirichlet_alpha=0.25,
@@ -122,7 +122,7 @@ def make_centipede_config() -> MuZeroConfig:
         batch_size=512,
         td_steps=15,
         visit_softmax_temperature_fn=visit_softmax_temperature,
-        lr=0.02)
+        lr=0.01)
 """
 Legacy configs from the DeepMind's pseudocode.
 def make_atari_config() -> MuZeroConfig:
