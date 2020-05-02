@@ -111,7 +111,6 @@ def make_centipede_config() -> MuZeroConfig:
         nb_episodes=5,
         nb_epochs=5,
         network_args={'action_size': 9,
-                      'state_size': 4,
                       'representation_size': (50, 32, 1),
                       'max_value': 5000},
         network=CentipedeNetwork,

@@ -16,6 +16,7 @@ class Centipede(AbstractGame):
         self.actions = list(map(lambda i: Action(i), list(range(9))))
         self.observations = [self.env.reset()]
         self.done = False
+        self.curr_lives = 3
 
     @property
     def action_space_size(self) -> int:
@@ -27,11 +28,12 @@ class Centipede(AbstractGame):
         observation, reward, done, info = self.env.step(action.index)
         self.observations += [observation]
         self.done = done
+        self.curr_lives = info['ale.lives']
         return reward
 
     def terminal(self) -> bool:
         """Is the game is finished?"""
-        if self.current_lives < 3:
+        if self.curr_lives < 3:
             return True
         return self.done
 
