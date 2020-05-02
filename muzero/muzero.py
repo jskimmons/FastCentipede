@@ -40,7 +40,7 @@ def muzero(config: MuZeroConfig, save_directory: str, load_directory: str, test:
               f"episodes.\n")
         return storage.latest_network()
 
-    test_eps = 0
+    test_eps = 5
     for loop in range(config.nb_training_loop):
         start = time()
         print("Training loop", loop)
@@ -52,8 +52,10 @@ def muzero(config: MuZeroConfig, save_directory: str, load_directory: str, test:
         train_network(config, storage, replay_buffer, config.nb_epochs)
         train_time = time()
 
-        print("\tEval score:", run_eval(config, storage, test_eps, visual=visual), '({} games)'.format(test_eps))
-        eval_time = time()
+        if loop % 10 == 0:
+            eval_results = run_eval(config, storage, test_eps, visual=visual)
+            print("Eval score: {} [{}]".format(eval_results[0], eval_results[1]))
+            eval_time = time()
 
         print(f"\tMuZero played {config.nb_episodes * (loop + 1)} "
               f"episodes and trained for {config.nb_epochs * (loop + 1)} epochs.")

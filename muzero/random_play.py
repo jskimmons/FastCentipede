@@ -2,7 +2,8 @@ import gym
 import random
 import numpy as np
 
-env = gym.make('Centipede-v0')
+#env = gym.make('Centipede-v0')
+env = gym.make('Breakout-v0')
 scores = list()
 
 for i in range(30):
@@ -11,10 +12,10 @@ for i in range(30):
     done = False
     while not done:
     #for i in range(200):
-        action = int(np.random.choice([0,10,11,12,13,14,15,16,17]))
+        action = int(np.random.choice([0,1,2,3]))
         observation, reward, done, _ = env.step(action)
         score += reward
-        # env.render()
+        env.render()
     print("Game " + str(i+1) + ": " + str(score))
     scores.append(score)
 

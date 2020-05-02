@@ -42,10 +42,12 @@ class UniformNetwork(AbstractNetwork):
         self.action_size = action_size
 
     def initial_inference(self, image) -> NetworkOutput:
-        return NetworkOutput(0, 0, {Action(i): 1 / self.action_size for i in range(self.action_size)}, None)
+        output = NetworkOutput(0, 0, {Action(i): 1 / self.action_size for i in range(self.action_size)}, None)
+        return output
 
     def recurrent_inference(self, hidden_state, action) -> NetworkOutput:
-        return NetworkOutput(0, 0, {Action(i): 1 / self.action_size for i in range(self.action_size)}, None)
+        output = NetworkOutput(0, 0, {Action(i): 1 / self.action_size for i in range(self.action_size)}, None)
+        return output
 
 
 class InitialModel(Model):
