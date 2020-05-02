@@ -93,7 +93,7 @@ class MuZeroConfig(object):
 
     def new_optimizer(self) -> tf.keras.optimizers:
         # return tf.keras.optimizers.SGD(learning_rate=self.lr, momentum=self.momentum)
-        return tf.keras.optimizers.Adam(learning_rate=self.lr)
+        return tf.keras.optimizers.Adadelta(learning_rate=self.lr)
 
 
 def make_centipede_config() -> MuZeroConfig:
@@ -123,7 +123,7 @@ def make_centipede_config() -> MuZeroConfig:
         batch_size=512,
         td_steps=15,
         visit_softmax_temperature_fn=visit_softmax_temperature,
-        lr=0.01)
+        lr=0.02)
 """
 Legacy configs from the DeepMind's pseudocode.
 def make_atari_config() -> MuZeroConfig:

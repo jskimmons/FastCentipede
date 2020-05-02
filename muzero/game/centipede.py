@@ -31,6 +31,8 @@ class Centipede(AbstractGame):
 
     def terminal(self) -> bool:
         """Is the game is finished?"""
+        if self.current_lives < 3:
+            return True
         return self.done
 
     def legal_actions(self) -> List[Action]:

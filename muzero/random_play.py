@@ -10,6 +10,7 @@ for i in range(30):
     score = 0
     done = False
     while not done:
+    #for i in range(200):
         action = int(np.random.choice([0,10,11,12,13,14,15,16,17]))
         observation, reward, done, _ = env.step(action)
         score += reward

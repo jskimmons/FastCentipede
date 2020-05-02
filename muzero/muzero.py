@@ -34,7 +34,8 @@ def muzero(config: MuZeroConfig, save_directory: str, load_directory: str, test:
 
     if test:
         test_eps = 5
-        print("Eval score:", run_eval(config, storage, test_eps, visual=visual))
+        eval_results = run_eval(config, storage, test_eps, visual=visual)
+        print("Eval score: {} [{}]".format(eval_results[0], eval_results[1]))
         print(f"MuZero played {test_eps} "
               f"episodes.\n")
         return storage.latest_network()
