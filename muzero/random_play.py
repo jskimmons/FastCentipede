@@ -1,23 +1,25 @@
 import gym
 import random
 import numpy as np
-
-#env = gym.make('Centipede-v0')
-env = gym.make('Breakout-v0')
+from game.centipede import Centipede
+from game.game import Action
+game = Centipede(discount=0.997)
 scores = list()
 
-for i in range(30):
-    env.reset()
+for i in range(3):
+    game = Centipede(discount=0.997)
     score = 0
     done = False
-    while not done:
+    while not game.terminal():
     #for i in range(200):
-        action = int(np.random.choice([0,1,2,3]))
-        observation, reward, done, _ = env.step(action)
+        action = Action(int(np.random.choice([0,1,2,3])))
+        print(action.index)
+        reward = game.step(action)
         score += reward
-        env.render()
+        game.env.render()
     print("Game " + str(i+1) + ": " + str(score))
     scores.append(score)
+    game.env.close()
 
 avg = np.average(np.asarray(scores))
 print(avg)

@@ -17,6 +17,7 @@ class Centipede(AbstractGame):
         self.observations = [self.env.reset()]
         self.done = False
         self.curr_lives = 5
+        self.env.step(1)
 
     @property
     def action_space_size(self) -> int:
@@ -25,16 +26,25 @@ class Centipede(AbstractGame):
 
     def step(self, action) -> int:
         """Execute one step of the game conditioned by the given action."""
+        if action.index < 2:
+            action.index = 2
+        elif action.index >= 2:
+            action.index = 3
         observation, reward, done, info = self.env.step(action.index)
         self.observations += [observation]
         self.done = done
-        self.curr_lives = info['ale.lives']
+        if info['ale.lives'] < self.curr_lives and not done:
+            # Make new ball fire
+            self.curr_lives = info['ale.lives']
+            observation, reward, done, info = self.env.step(1)
+            self.done = done
+
         return reward
 
     def terminal(self) -> bool:
         """Is the game is finished?"""
-        #if self.curr_lives < 5:
-            #return True
+        if self.curr_lives < 5:
+            return True
         return self.done
 
     def legal_actions(self) -> List[Action]:

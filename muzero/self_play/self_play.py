@@ -36,7 +36,7 @@ def run_eval(config: MuZeroConfig, storage: SharedStorage, eval_episodes: int, v
     if eval_episodes:
         progress_bar(eval_episodes, eval_episodes, name='Eval')
         print('{}'.format(' '*60), end='\r')
-    return [(sum(returns)) / eval_episodes, returns] if eval_episodes else 0, 'N/A'
+    return [(sum(returns)) / eval_episodes, returns] if eval_episodes else [0, 'N/A']
 
 
 def play_game(config: MuZeroConfig, network: AbstractNetwork, train: bool = True, visual: bool = False) -> AbstractGame:
