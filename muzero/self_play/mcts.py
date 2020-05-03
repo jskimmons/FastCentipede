@@ -118,10 +118,15 @@ def select_action(config: MuZeroConfig, num_moves: int, node: Node, network: Bas
     visit_counts = [child.visit_count for child in node.children.values()]
     actions = [action for action in node.children.keys()]
     action = None
+    """
     if mode == 'softmax':
         t = config.visit_softmax_temperature_fn(
             num_moves=num_moves, training_steps=network.training_steps)
         action = softmax_sample(visit_counts, actions, t)
     elif mode == 'max':
         action, _ = max(node.children.items(), key=lambda item: item[1].visit_count)
+    """
+    t = config.visit_softmax_temperature_fn(
+        num_moves=num_moves, training_steps=network.training_steps)
+    action = softmax_sample(visit_counts, actions, t)
     return action

@@ -12,7 +12,7 @@ for i in range(3):
     done = False
     while not game.terminal():
     #for i in range(200):
-        action = Action(int(np.random.choice([0,1,2,3])))
+        action = Action(int(np.random.choice([0,1])))
         print(action.index)
         reward = game.step(action)
         score += reward

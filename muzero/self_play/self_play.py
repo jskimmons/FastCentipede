@@ -61,7 +61,6 @@ def play_game(config: MuZeroConfig, network: AbstractNetwork, train: bool = True
         # model learned by the networks.
         run_mcts(config, root, game.action_history(), network)
         action = select_action(config, len(game.history), root, network, mode=mode_action_select)
-        #print(action.index)
         game.apply(action)
         game.store_search_statistics(root)
         if visual:

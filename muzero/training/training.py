@@ -64,7 +64,7 @@ def update_weights(optimizer: tf.keras.optimizers, network: BaseNetwork, batch):
             actions_batch = tf.one_hot(actions_batch, network.action_size)
 
             # TODO: make this reshape dynamic
-            actions_batch = tf.reshape(actions_batch, (actions_batch.shape[0], 2, 2, 1))
+            actions_batch = tf.reshape(actions_batch, (actions_batch.shape[0], 1, 2, 1))
 
             paddings = tf.constant([[0, 0],
                                     [0, max(0, representation_batch.shape[1] - actions_batch.shape[1])],

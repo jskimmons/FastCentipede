@@ -13,10 +13,11 @@ class Centipede(AbstractGame):
         self.env = gym.make('Breakout-v0')
         #self.env = LimitToShootActions(self.env)
         self.env = DownSampleVisualObservationWrapper(self.env, factor=5)
-        self.actions = list(map(lambda i: Action(i), list(range(self.env.action_space.n))))
+        self.actions = list(map(lambda i: Action(i), list(range(2))))
         self.observations = [self.env.reset()]
         self.done = False
         self.curr_lives = 5
+        self.env.step(1)
         self.env.step(1)
 
     @property
@@ -26,11 +27,12 @@ class Centipede(AbstractGame):
 
     def step(self, action) -> int:
         """Execute one step of the game conditioned by the given action."""
-        if action.index < 2:
-            action.index = 2
-        elif action.index >= 2:
-            action.index = 3
-        observation, reward, done, info = self.env.step(action.index)
+        index = action.index
+        if index == 0:
+            index = 2
+        elif index == 1:
+            index = 3
+        observation, reward, done, info = self.env.step(index)
         self.observations += [observation]
         self.done = done
         if info['ale.lives'] < self.curr_lives and not done:
