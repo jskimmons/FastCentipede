@@ -10,13 +10,13 @@ from training.replay_buffer import ReplayBuffer
 from display import progress_bar
 
 
-def run_selfplay(config: MuZeroConfig, storage: SharedStorage, replay_buffer: ReplayBuffer, train_episodes: int):
+def run_selfplay(config: MuZeroConfig, storage: SharedStorage, replay_buffer: ReplayBuffer, train_episodes: int, visual=False):
     """Take the latest network, produces multiple games and save them in the shared replay buffer"""
     network = storage.latest_network()
     returns = []
     for _ in range(train_episodes):
         progress_bar(_, train_episodes, name='Selfplay')
-        game = play_game(config, network)
+        game = play_game(config, network, visual=visual)
         replay_buffer.save_game(game)
         returns.append(sum(game.rewards))
     if train_episodes:
@@ -36,7 +36,7 @@ def run_eval(config: MuZeroConfig, storage: SharedStorage, eval_episodes: int, v
     if eval_episodes:
         progress_bar(eval_episodes, eval_episodes, name='Eval')
         print('{}'.format(' '*60), end='\r')
-    return [(sum(returns)) / eval_episodes, returns] if eval_episodes else 0
+    return [(sum(returns)) / eval_episodes, returns] if eval_episodes else 0, 'N/A'
 
 
 def play_game(config: MuZeroConfig, network: AbstractNetwork, train: bool = True, visual: bool = False) -> AbstractGame:

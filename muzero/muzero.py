@@ -40,14 +40,18 @@ def muzero(config: MuZeroConfig, save_directory: str, load_directory: str, test:
               f"episodes.\n")
         return storage.latest_network()
 
-    test_eps = 5
+    test_eps = 0
+    best_score = 0
     for loop in range(config.nb_training_loop):
         start = time()
         print("Training loop", loop)
 
-        score_train, scores = run_selfplay(config, storage, replay_buffer, config.nb_episodes)
+        score_train, scores = run_selfplay(config, storage, replay_buffer, config.nb_episodes, visual=visual)
         print("\tTrain score: " + str(score_train), '({} games: {})'.format(config.nb_episodes, scores))
         self_play_time = time()
+        if score_train > best_score and loop > 0:
+            storage.save_network_to_disk(storage.latest_network(), 'networks/instances/best-breakout')
+            best_score = score_train
 
         train_network(config, storage, replay_buffer, config.nb_epochs)
         train_time = time()

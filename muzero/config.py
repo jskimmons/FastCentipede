@@ -108,8 +108,8 @@ def make_centipede_config() -> MuZeroConfig:
     return MuZeroConfig(
         game=Centipede,
         nb_training_loop=1000,
-        nb_episodes=10,
-        nb_epochs=50,
+        nb_episodes=5,
+        nb_epochs=20,
         network_args={'action_size': 4,
                       'representation_size': (42, 32, 1),
                       'max_value': 5000},

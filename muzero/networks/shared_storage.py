@@ -27,5 +27,8 @@ class SharedStorage(object):
     def save_network(self, step: int, network: BaseNetwork):
         self._networks[step] = network
 
-    def save_network_to_disk(self, network: BaseNetwork):
-        network.save_network(self.directory)
+    def save_network_to_disk(self, network: BaseNetwork, file=None):
+        if file:
+            network.save_network(file)
+        else:
+            network.save_network(self.directory)
